@@ -9,6 +9,8 @@ var brickSide = 17;
 var bombCount = prompt("Введите количество бомб");
 var start = true;
 var bricksPaddle = 2;
+var shift = false;
+var count = brickSideHeightCount* brickSideWidthCount;
 
 canvas.height = (brickSide+2)*brickSideHeightCount;
 canvas.width = (brickSide+2)*brickSideWidthCount;
@@ -26,6 +28,8 @@ for (var c = 0; c < brickSideWidthCount; c++) {
 document.addEventListener("mouseup", mouseUpHandler, false);
 //document.addEventListener("mousedown", mouseDownHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
+document.addEventListener("keydown", downHandler, false);
+document.addEventListener("keyup", upHandler, false);
 
 /*function mouseDownHandler(e) {
 	for(c=0; c<brickSideWidthCount; c++) {
@@ -38,6 +42,18 @@ document.addEventListener("mousemove", mouseMoveHandler, false);
 	}; 
 }*/
 
+function downHandler(e) {
+	if (e.keyCode == 16) {
+		shift = true;
+	}
+}
+
+function upHandler(e) {
+	if (e.keyCode == 16) {
+		shift = false;
+	}
+}
+
 function mouseMoveHandler(e) {
 	relativeY = e.pageY - 10;
 	relativeX = e.pageX-10;
@@ -48,10 +64,23 @@ function mouseUpHandler(e) {
 		for(r=0; r<brickSideHeightCount; r++) {
 			var b = bricks[c][r];
 			if (relativeX > b.x && relativeX < b.x + brickSide && relativeY > b.y && relativeY < b.y + brickSide) {
-				if (start) {
-					makeBombs(c,r);
-				};
-				open(c, r);
+				if (!shift) {
+					if (start) {
+						makeBombs(c,r);
+					};
+					if (b.status == 1) {
+						open(c, r);
+					}
+				} else if (shift) {
+					switch(b.status) {
+						case 4:
+							bricks[c][r].status = 1;
+							break;
+						case 1:
+							bricks[c][r].status = 4;
+						default:
+					}				
+				}
 			};
 		};
 	}; 
@@ -59,9 +88,18 @@ function mouseUpHandler(e) {
 
 function open(c, r) {
 	bricks[c][r].status = 0; 
+	count -= 1;
 	if (bricks[c][r].bomb == true) {
-		alert("YOU LOSE!");
-		location.reload();
+		var reload = confirm("Вы проиграли! Начать игру заново?");
+		if (reload) {
+			location.reload();
+		} else {
+			for (c = 0; c < brickSideWidthCount; c++) {
+				for(r = 0; r < brickSideHeightCount; r++) {
+					bricks[c][r].status = 1;
+				}
+			}
+		}
 	}
 	if (bricks[c][r].count == 0) {
 		check();
@@ -73,45 +111,45 @@ function check() {
 		for(r = 0; r < brickSideHeightCount; r++) {
 			if (bricks[c][r].status == 1) {
 				if (c>0){
-					if (bricks[c-1][r].count === 0 && bricks[c-1][r].status == 0) {
+					if (bricks[c-1][r].count === 0 && bricks[c-1][r].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (c>0 && r>0) {
-					if (bricks[c-1][r-1].count === 0 && bricks[c-1][r-1].status == 0) {
+					if (bricks[c-1][r-1].count === 0 && bricks[c-1][r-1].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (c>0 && r<brickSideHeightCount-1) {
-					if (bricks[c-1][r+1].count === 0 && bricks[c-1][r+1].status == 0) {
+					if (bricks[c-1][r+1].count === 0 && bricks[c-1][r+1].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (r>0){ 
-					if (bricks[c][r-1].count === 0 && bricks[c][r-1].status == 0) {
+					if (bricks[c][r-1].count === 0 && bricks[c][r-1].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (r<brickSideHeightCount-1) {
-					if (bricks[c][r+1].count === 0 && bricks[c][r+1].status == 0) {
+					if (bricks[c][r+1].count === 0 && bricks[c][r+1].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (c<brickSideWidthCount-1 && r>0) {
-					if (bricks[c+1][r-1].count === 0 && bricks[c+1][r-1].status == 0) {
+					if (bricks[c+1][r-1].count === 0 && bricks[c+1][r-1].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (c<brickSideWidthCount-1) {
-					if (bricks[c+1][r].count === 0 && bricks[c+1][r].status == 0) {
+					if (bricks[c+1][r].count === 0 && bricks[c+1][r].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 				if (c< brickSideWidthCount-1 && r<brickSideHeightCount-1) {
-					if (bricks[c+1][r+1].count === 0 && bricks[c+1][r+1].status == 0) {
+					if (bricks[c+1][r+1].count === 0 && bricks[c+1][r+1].status == 0 && bricks[c][r].status == 1) {
 						open(c,r);
 					};
-				};
+				}
 			};
 		};
 	};
@@ -193,7 +231,13 @@ function drawBricks() {
 				ctx.fillStyle = "#0095DD";
 				ctx.fill();
 				ctx.closePath();
-			} else if (bricks[c][r].bomb === false) {
+			} else if(bricks[c][r].status === 4) { 
+				ctx.beginPath();
+				ctx.rect(brickX, brickY, brickSide, brickSide);
+				ctx.fillStyle = "green";
+				ctx.fill();
+				ctx.closePath();
+			}else if (bricks[c][r].bomb === false ) {
 				ctx.font = brickSide + "px Arial";
 				ctx.fillStyle = "#0095DD";
 				ctx.fillText(bricks[c][r].count, brickX, brickY+brickSide)
@@ -208,6 +252,12 @@ function drawBricks() {
 	};
 };
 
+function drawScore() {
+	ctx.font = "16px Arial";
+	ctx.fillStyle = "black";
+	ctx.fillText(count, 20,20);
+}
+
 
 function draw() {
 	ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -217,7 +267,11 @@ function draw() {
 		start = false;
 	};*/
 	drawBricks();
-
+	drawScore();
+	if (count == bombCount) {
+		alert("Вы победили!");
+		location.reload();
+	}
 };
 
 setInterval(draw, 10);
